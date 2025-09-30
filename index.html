@@ -1,0 +1,481 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor de Texto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --color-dark-bg: #0D1B2A;
+            --color-card-bg: rgba(30, 41, 59, 0.7);
+            --color-neon-blue: #3B82F6;
+            --color-neon-purple: #A855F7;
+            --color-text-primary: #E5E7EB;
+            --color-text-secondary: #9CA3AF;
+            --color-accent: #22D3EE;
+            --color-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--color-dark-bg), #1E293B);
+            font-family: 'Poppins', sans-serif;
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--color-neon-blue), var(--color-neon-purple));
+            width: 100%;
+            padding: clamp(1rem, 3vw, 1.5rem);
+            text-align: center;
+            font-size: clamp(1.25rem, 4vw, 1.75rem);
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.05rem;
+        }
+
+        main {
+            max-width: 900px;
+            width: 100%;
+            padding: clamp(1rem, 4vw, 2rem);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(1rem, 3vw, 2rem);
+        }
+
+        label {
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            font-weight: 600;
+            margin-bottom: clamp(0.5rem, 2vw, 0.75rem);
+            display: block;
+        }
+
+        .input-container {
+            position: relative;
+            background: var(--color-card-bg);
+            border-radius: 16px;
+            padding: clamp(0.75rem, 2vw, 1rem);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--color-border);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: clamp(100px, 20vh, 140px);
+            padding: clamp(0.75rem, 2vw, 1rem);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
+            color: var(--color-text-primary);
+            background: rgba(255, 255, 255, 0.05);
+            resize: vertical;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-neon-blue);
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+        }
+
+        #clear-input-btn {
+            position: absolute;
+            top: clamp(1rem, 2vw, 1.5rem);
+            right: clamp(1rem, 2vw, 1.5rem);
+            background: none;
+            border: none;
+            color: var(--color-text-secondary);
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        #clear-input-btn:hover {
+            color: var(--color-accent);
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: clamp(0.5rem, 2vw, 1rem);
+        }
+
+        button {
+            padding: clamp(0.75rem, 2.5vw, 0.875rem) clamp(1rem, 3vw, 1.5rem);
+            border: none;
+            border-radius: 12px;
+            font-size: clamp(0.875rem, 2.5vw, 0.9375rem);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: linear-gradient(45deg, var(--color-neon-blue), var(--color-neon-purple));
+            color: white;
+            transition: transform 0.3s, box-shadow 0.3s;
+            touch-action: manipulation;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+        }
+
+        .text-btn {
+            background: var(--color-card-bg);
+            color: var(--color-text-primary);
+            backdrop-filter: blur(5px);
+        }
+
+        .text-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.5);
+        }
+
+        #output-container {
+            background: var(--color-card-bg);
+            border-radius: 16px;
+            padding: clamp(1rem, 2vw, 1.5rem);
+            min-height: clamp(120px, 25vh, 160px);
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+            position: relative;
+            transition: box-shadow 0.3s;
+        }
+
+        #output-container:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        #output-text {
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
+            color: var(--color-text-primary);
+            word-break: break-word;
+        }
+
+        #output-text.placeholder {
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        #copy-btn {
+            position: absolute;
+            bottom: clamp(0.75rem, 2vw, 1rem);
+            right: clamp(0.75rem, 2vw, 1rem);
+            background: var(--color-card-bg);
+            color: var(--color-accent);
+            border-radius: 50%;
+            width: clamp(36px, 10vw, 40px);
+            height: clamp(36px, 10vw, 40px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        #copy-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
+        }
+
+        #toast {
+            position: fixed;
+            bottom: clamp(1rem, 5vh, 2rem);
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, var(--color-neon-blue), var(--color-neon-purple));
+            color: white;
+            padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem);
+            border-radius: 8px;
+            display: none;
+            font-size: clamp(0.875rem, 2.5vw, 0.9375rem);
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #toast.show {
+            display: flex;
+        }
+
+        /* Mobile-first responsive adjustments */
+        @media (max-width: 768px) {
+            main {
+                padding: clamp(0.75rem, 3vw, 1rem);
+            }
+
+            header {
+                font-size: clamp(1rem, 4vw, 1.5rem);
+            }
+
+            .buttons {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 0.5rem;
+            }
+
+            button {
+                padding: clamp(0.625rem, 2vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
+                font-size: clamp(0.75rem, 2vw, 0.875rem);
+            }
+
+            textarea {
+                min-height: clamp(80px, 15vh, 100px);
+            }
+
+            #output-container {
+                min-height: clamp(100px, 20vh, 120px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .buttons {
+                grid-template-columns: 1fr;
+            }
+
+            button {
+                justify-content: flex-start;
+            }
+
+            .input-container, #output-container {
+                padding: clamp(0.5rem, 2vw, 0.75rem);
+            }
+
+            #clear-input-btn, #copy-btn {
+                font-size: clamp(0.875rem, 3vw, 1rem);
+                width: clamp(32px, 8vw, 36px);
+                height: clamp(32px, 8vw, 36px);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            main {
+                max-width: 1000px;
+            }
+
+            .buttons {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>Conversor de Texto</header>
+    <main>
+        <label>Digite ou cole o texto para converter:</label>
+        <div class="input-container">
+            <textarea id="input-text" placeholder="Insira seu texto aqui..."></textarea>
+            <button id="clear-input-btn" onclick="clearInputAndResult()">
+                <i class="fas fa-times-circle"></i>
+            </button>
+        </div>
+
+        <label>Resultado da Conversão:</label>
+        <div id="output-container">
+            <p id="output-text" class="placeholder">O texto convertido aparecerá aqui...</p>
+            <button id="copy-btn" onclick="copyResult()">
+                <i class="fas fa-copy"></i>
+            </button>
+        </div>
+
+        <div class="buttons">
+            <button class="elevated-btn" onclick="toUpperCase()">
+                <i class="fas fa-font"></i>
+                <span>MAIÚSCULAS</span>
+            </button>
+            <button class="elevated-btn" onclick="toLowerCase()">
+                <i class="fas fa-text-size"></i>
+                <span>minúsculas</span>
+            </button>
+            <button class="elevated-btn" onclick="invertCase()">
+                <i class="fas fa-arrows-alt-v"></i>
+                <span>Inverter Caso</span>
+            </button>
+            <button class="elevated-btn" onclick="titleCase()">
+                <i class="fas fa-heading"></i>
+                <span>Caso de Título</span>
+            </button>
+            <button class="elevated-btn" onclick="sentenceCase()">
+                <i class="fas fa-quote-left"></i>
+                <span>Caso de Sentença</span>
+            </button>
+            <button class="text-btn" onclick="clearInputAndResult()">
+                <i class="fas fa-trash-alt"></i>
+                <span>Limpar Tudo</span>
+            </button>
+        </div>
+    </main>
+
+    <div id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span>Texto copiado para a área de transferência!</span>
+    </div>
+
+    <script>
+        const inputText = document.getElementById('input-text');
+        const outputText = document.getElementById('output-text');
+        const clearInputBtn = document.getElementById('clear-input-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const toast = document.getElementById('toast');
+
+        inputText.addEventListener('input', updateInput);
+
+        function updateInput() {
+            const input = inputText.value;
+            const output = performAutoConversion(input);
+            setOutput(output);
+            clearInputBtn.style.display = input ? 'block' : 'none';
+        }
+
+        function performAutoConversion(input) {
+            if (!input) return '';
+
+            let upperCount = 0;
+            let lowerCount = 0;
+
+            for (let char of input) {
+                if (char === char.toUpperCase() && char !== char.toLowerCase()) {
+                    upperCount++;
+                } else if (char === char.toLowerCase() && char !== char.toUpperCase()) {
+                    lowerCount++;
+                }
+            }
+
+            if (upperCount > lowerCount) {
+                return input.toLowerCase();
+            } else {
+                return input.toUpperCase();
+            }
+        }
+
+        function setOutput(text) {
+            if (text) {
+                outputText.textContent = text;
+                outputText.classList.remove('placeholder');
+                copyBtn.style.display = 'block';
+            } else {
+                outputText.textContent = 'O texto convertido aparecerá aqui...';
+                outputText.classList.add('placeholder');
+                copyBtn.style.display = 'none';
+            }
+        }
+
+        function getInput() {
+            return inputText.value;
+        }
+
+        function toUpperCase() {
+            setOutput(getInput().toUpperCase());
+        }
+
+        function toLowerCase() {
+            setOutput(getInput().toLowerCase());
+        }
+
+        function invertCase() {
+            const input = getInput();
+            const output = input.split('').map(char => {
+                if (char === char.toUpperCase()) {
+                    return char.toLowerCase();
+                } else {
+                    return char.toUpperCase();
+                }
+            }).join('');
+            setOutput(output);
+        }
+
+        function titleCase() {
+            const input = getInput();
+            const output = input.split(' ').map(word => {
+                if (!word) return '';
+                return word[0].toUpperCase() + word.slice(1).toLowerCase();
+            }).join(' ');
+            setOutput(output);
+        }
+
+        function sentenceCase() {
+            const input = getInput();
+            const output = input.toLowerCase().replace(/(^\w|\.\s+\w)/g, match => match.toUpperCase());
+            setOutput(output);
+        }
+
+        function clearInputAndResult() {
+            inputText.value = '';
+            setOutput('');
+            clearInputBtn.style.display = 'none';
+        }
+
+        async function copyResult() {
+            const text = outputText.textContent;
+            if (text && !outputText.classList.contains('placeholder')) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    showToast();
+                } catch (err) {
+                    console.error('Falha ao copiar: ', err);
+                }
+            }
+        }
+
+        function showToast() {
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
