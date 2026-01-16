@@ -1,482 +1,561 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
-<html lang="pt">
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light" data-lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversor de Texto</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --color-dark-bg: #0D1B2A;
-            --color-card-bg: rgba(30, 41, 59, 0.7);
-            --color-neon-blue: #3B82F6;
-            --color-neon-purple: #A855F7;
-            --color-text-primary: #E5E7EB;
-            --color-text-secondary: #9CA3AF;
-            --color-accent: #22D3EE;
-            --color-border: rgba(255, 255, 255, 0.1);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Conversor de Texto - Transforme seu texto rapidamente</title>
+  <meta name="description" content="Converta texto para maiúsculas, minúsculas, title case, sentence case, inverter caso e mais. Gratuito e sem anúncios."/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --border: #e2e8f0;
+      --card: #f8fafc;
+      --radius: 12px;
+      --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.05);
+    }
 
-        body {
-            background: linear-gradient(135deg, var(--color-dark-bg), #1E293B);
-            font-family: 'Poppins', sans-serif;
-            color: var(--color-text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-        }
+    [data-theme="dark"] {
+      --bg: #0a0a0a;
+      --text: #f0f0f0;
+      --text-secondary: #a0a0a0;
+      --primary: #818cf8;
+      --primary-hover: #6366f1;
+      --border: #2a2a2a;
+      --card: #1a1a1a;
+    }
 
-        header {
-            background: linear-gradient(90deg, var(--color-neon-blue), var(--color-neon-purple));
-            width: 100%;
-            padding: clamp(1rem, 3vw, 1.5rem);
-            text-align: center;
-            font-size: clamp(1.25rem, 4vw, 1.75rem);
-            font-weight: 700;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.05rem;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        main {
-            max-width: 900px;
-            width: 100%;
-            padding: clamp(1rem, 4vw, 2rem);
-            display: flex;
-            flex-direction: column;
-            gap: clamp(1rem, 3vw, 2rem);
-        }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1rem;
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
 
-        label {
-            font-size: clamp(1rem, 3vw, 1.25rem);
-            font-weight: 600;
-            margin-bottom: clamp(0.5rem, 2vw, 0.75rem);
-            display: block;
-        }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
 
-        .input-container {
-            position: relative;
-            background: var(--color-card-bg);
-            border-radius: 16px;
-            padding: clamp(0.75rem, 2vw, 1rem);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--color-border);
-        }
+    .top-controls {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+    }
 
-        textarea {
-            width: 100%;
-            min-height: clamp(100px, 20vh, 140px);
-            padding: clamp(0.75rem, 2vw, 1rem);
-            border: 1px solid var(--color-border);
-            border-radius: 12px;
-            font-size: clamp(0.875rem, 2.5vw, 1rem);
-            color: var(--color-text-primary);
-            background: rgba(255, 255, 255, 0.05);
-            resize: vertical;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
+    .lang-select {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem 0.75rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      color: var(--text);
+      min-width: 140px;
+    }
 
-        textarea:focus {
-            outline: none;
-            border-color: var(--color-neon-blue);
-            box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
-        }
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 1000;
+      background: transparent;   /* Sem fundo */
+      border: none;              /* Sem borda */
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;         /* Emoji um pouco maior para visibilidade */
+      cursor: pointer;
+      color: var(--text-secondary);
+      opacity: 0.6;              /* Mais discreto (opacidade reduzida) */
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      box-shadow: none;          /* Sem sombra */
+    }
 
-        #clear-input-btn {
-            position: absolute;
-            top: clamp(1rem, 2vw, 1.5rem);
-            right: clamp(1rem, 2vw, 1.5rem);
-            background: none;
-            border: none;
-            color: var(--color-text-secondary);
-            font-size: clamp(1rem, 3vw, 1.25rem);
-            cursor: pointer;
-            transition: color 0.3s;
-        }
+    .theme-toggle:hover {
+      opacity: 1;                /* Fica mais visível no hover */
+      transform: scale(1.1);
+    }
 
-        #clear-input-btn:hover {
-            color: var(--color-accent);
-        }
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
 
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: clamp(0.5rem, 2vw, 1rem);
-        }
+    h1 {
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
 
-        button {
-            padding: clamp(0.75rem, 2.5vw, 0.875rem) clamp(1rem, 3vw, 1.5rem);
-            border: none;
-            border-radius: 12px;
-            font-size: clamp(0.875rem, 2.5vw, 0.9375rem);
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            background: linear-gradient(45deg, var(--color-neon-blue), var(--color-neon-purple));
-            color: white;
-            transition: transform 0.3s, box-shadow 0.3s;
-            touch-action: manipulation;
-        }
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: clamp(0.9rem, 3.5vw, 1.05rem);
+    }
 
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
-        }
+    .editor {
+      display: grid;
+      gap: 1.25rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
 
-        .text-btn {
-            background: var(--color-card-bg);
-            color: var(--color-text-primary);
-            backdrop-filter: blur(5px);
-        }
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 1rem;
+      font-size: clamp(0.95rem, 3.5vw, 1.05rem);
+      line-height: 1.6;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--text);
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
 
-        .text-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.5);
-        }
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
 
-        #output-container {
-            background: var(--color-card-bg);
-            border-radius: 16px;
-            padding: clamp(1rem, 2vw, 1.5rem);
-            min-height: clamp(120px, 25vh, 160px);
-            border: 1px solid var(--color-border);
-            backdrop-filter: blur(10px);
-            position: relative;
-            transition: box-shadow 0.3s;
-        }
+    .char-count {
+      text-align: right;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
 
-        #output-container:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
+    .output-wrapper {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+    }
 
-        #output-text {
-            font-size: clamp(0.875rem, 2.5vw, 1rem);
-            color: var(--color-text-primary);
-            word-break: break-word;
-        }
+    .output {
+      min-height: 140px;
+      padding: 1rem 3.5rem 1rem 1rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: clamp(0.95rem, 3.5vw, 1.05rem);
+    }
 
-        #output-text.placeholder {
-            color: var(--color-text-secondary);
-            font-style: italic;
-        }
+    .output:empty::before {
+      content: attr(data-placeholder);
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
 
-        #copy-btn {
-            position: absolute;
-            bottom: clamp(0.75rem, 2vw, 1rem);
-            right: clamp(0.75rem, 2vw, 1rem);
-            background: var(--color-card-bg);
-            color: var(--color-accent);
-            border-radius: 50%;
-            width: clamp(36px, 10vw, 40px);
-            height: clamp(36px, 10vw, 40px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s, box-shadow 0.3s;
-        }
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.9rem;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
 
-        #copy-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
-        }
+    .copy-btn:hover {
+      background: #059669;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(16, 185, 129, 0.2);
+    }
 
-        #toast {
-            position: fixed;
-            bottom: clamp(1rem, 5vh, 2rem);
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(45deg, var(--color-neon-blue), var(--color-neon-purple));
-            color: white;
-            padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem);
-            border-radius: 8px;
-            display: none;
-            font-size: clamp(0.875rem, 2.5vw, 0.9375rem);
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            align-items: center;
-            gap: 0.5rem;
-        }
+    .copy-btn.disabled {
+      background: #6b7280;
+      cursor: not-allowed;
+    }
 
-        #toast.show {
-            display: flex;
-        }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
 
-        /* Mobile-first responsive adjustments */
-        @media (max-width: 768px) {
-            main {
-                padding: clamp(0.75rem, 3vw, 1rem);
-            }
+    button {
+      padding: 0.75rem 1.4rem;
+      font-size: clamp(0.9rem, 3.5vw, 0.95rem);
+      font-weight: 500;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--primary);
+      color: white;
+      flex: 1;
+      min-width: 140px;
+    }
 
-            header {
-                font-size: clamp(1rem, 4vw, 1.5rem);
-            }
+    button:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(99, 102, 241, 0.2);
+    }
 
-            .buttons {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                gap: 0.5rem;
-            }
+    button.clear {
+      background: #ef4444;
+    }
 
-            button {
-                padding: clamp(0.625rem, 2vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
-                font-size: clamp(0.75rem, 2vw, 0.875rem);
-            }
+    button.clear:hover {
+      background: #dc2626;
+    }
 
-            textarea {
-                min-height: clamp(80px, 15vh, 100px);
-            }
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: #1e1e1e;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      opacity: 0;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: clamp(1rem, 4vw, 1.1rem);
+      max-width: 90%;
+      text-align: center;
+    }
 
-            #output-container {
-                min-height: clamp(100px, 20vh, 120px);
-            }
-        }
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      animation: bounceIn 0.6s ease-out;
+    }
 
-        @media (max-width: 480px) {
-            .buttons {
-                grid-template-columns: 1fr;
-            }
+    @keyframes bounceIn {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      70% { transform: translate(-50%, -50%) scale(0.9); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
 
-            button {
-                justify-content: flex-start;
-            }
+    .toast::before {
+      content: "✅";
+      font-size: 1.5rem;
+      animation: spin 0.5s ease-in-out;
+    }
 
-            .input-container, #output-container {
-                padding: clamp(0.5rem, 2vw, 0.75rem);
-            }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-            #clear-input-btn, #copy-btn {
-                font-size: clamp(0.875rem, 3vw, 1rem);
-                width: clamp(32px, 8vw, 36px);
-                height: clamp(32px, 8vw, 36px);
-            }
-        }
+    @media (max-width: 600px) {
+      .top-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+      }
+      .theme-toggle {
+        top: 1rem;
+        right: 1rem;
+        width: 40px;
+        height: 40px;
+        font-size: 1.4rem;
+        opacity: 0.7;
+      }
+      .editor { padding: 1.25rem; gap: 1rem; }
+      .toolbar { flex-direction: column; }
+      button { min-width: auto; }
+      .output { padding-right: 3rem; min-height: 120px; }
+      .copy-btn { padding: 0.4rem 0.8rem; font-size: 0.85rem; top: 0.6rem; right: 0.6rem; }
+      .char-count { font-size: 0.85rem; }
+      header { margin-bottom: 1.5rem; }
+    }
 
-        @media (min-width: 1200px) {
-            main {
-                max-width: 1000px;
-            }
-
-            .buttons {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-    </style>
+    @media (max-width: 480px) {
+      body { padding: 0.75rem; }
+      .editor { padding: 1rem; }
+      textarea, .output { min-height: 110px; }
+      .copy-btn { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+    }
+  </style>
 </head>
 <body>
-    <header>Conversor de Texto</header>
-    <main>
-        <label>Digite ou cole o texto para converter:</label>
-        <div class="input-container">
-            <textarea id="input-text" placeholder="Insira seu texto aqui..."></textarea>
-            <button id="clear-input-btn" onclick="clearInputAndResult()">
-                <i class="fas fa-times-circle"></i>
-            </button>
-        </div>
 
-        <label>Resultado da Conversão:</label>
-        <div id="output-container">
-            <p id="output-text" class="placeholder">O texto convertido aparecerá aqui...</p>
-            <button id="copy-btn" onclick="copyResult()">
-                <i class="fas fa-copy"></i>
-            </button>
-        </div>
-
-        <div class="buttons">
-            <button class="elevated-btn" onclick="toUpperCase()">
-                <i class="fas fa-font"></i>
-                <span>MAIÚSCULAS</span>
-            </button>
-            <button class="elevated-btn" onclick="toLowerCase()">
-                <i class="fas fa-text-size"></i>
-                <span>minúsculas</span>
-            </button>
-            <button class="elevated-btn" onclick="invertCase()">
-                <i class="fas fa-arrows-alt-v"></i>
-                <span>Inverter Caso</span>
-            </button>
-            <button class="elevated-btn" onclick="titleCase()">
-                <i class="fas fa-heading"></i>
-                <span>Caso de Título</span>
-            </button>
-            <button class="elevated-btn" onclick="sentenceCase()">
-                <i class="fas fa-quote-left"></i>
-                <span>Caso de Sentença</span>
-            </button>
-            <button class="text-btn" onclick="clearInputAndResult()">
-                <i class="fas fa-trash-alt"></i>
-                <span>Limpar Tudo</span>
-            </button>
-        </div>
-    </main>
-
-    <div id="toast">
-        <i class="fas fa-check-circle"></i>
-        <span>Texto copiado para a área de transferência!</span>
+  <div class="container">
+    <div class="top-controls">
+      <select class="lang-select" id="lang-select">
+        <option value="pt">Português</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+      </select>
     </div>
 
-    <script>
-        const inputText = document.getElementById('input-text');
-        const outputText = document.getElementById('output-text');
-        const clearInputBtn = document.getElementById('clear-input-btn');
-        const copyBtn = document.getElementById('copy-btn');
-        const toast = document.getElementById('toast');
+    <header>
+      <h1 data-i18n="title">Conversor de Texto</h1>
+      <p class="subtitle" data-i18n="subtitle">Transforme seu texto em segundos • Gratuito e sem anúncios</p>
+    </header>
 
-        inputText.addEventListener('input', updateInput);
+    <div class="editor">
+      <textarea id="input" data-i18n-placeholder="inputPlaceholder" placeholder="Cole ou digite seu texto aqui..." autofocus></textarea>
+      <p class="char-count" id="char-count" data-i18n="charCount">Caracteres: 0</p>
+      
+      <div class="output-wrapper">
+        <div class="output" id="output" data-placeholder data-i18n-placeholder="outputPlaceholder"></div>
+        <button data-action="copy" class="copy-btn" data-i18n="copy">Copiar</button>
+      </div>
 
-        function updateInput() {
-            const input = inputText.value;
-            const output = performAutoConversion(input);
-            setOutput(output);
-            clearInputBtn.style.display = input ? 'block' : 'none';
-        }
+      <div class="toolbar">
+        <button data-action="upper" data-i18n="upper">MAIÚSCULAS</button>
+        <button data-action="lower" data-i18n="lower">minúsculas</button>
+        <button data-action="invert" data-i18n="invert">Inverter Caso</button>
+        <button data-action="title" data-i18n="titleCase">Caso de Título</button>
+        <button data-action="sentence" data-i18n="sentence">Caso de Sentença</button>
+        <button data-action="clear" class="clear" data-i18n="clear">Limpar Tudo</button>
+      </div>
+    </div>
+  </div>
 
-        function performAutoConversion(input) {
-            if (!input) return '';
+  <button class="theme-toggle" aria-label="Alternar tema">🌙</button>
 
-            let upperCount = 0;
-            let lowerCount = 0;
+  <div class="toast" id="toast" data-i18n="toast">Texto copiado para a área de transferência!</div>
 
-            for (let char of input) {
-                if (char === char.toUpperCase() && char !== char.toLowerCase()) {
-                    upperCount++;
-                } else if (char === char.toLowerCase() && char !== char.toUpperCase()) {
-                    lowerCount++;
-                }
-            }
+  <script>
+    const translations = {
+      pt: {
+        title: 'Conversor de Texto',
+        subtitle: 'Transforme seu texto em segundos • Gratuito e sem anúncios',
+        inputPlaceholder: 'Cole ou digite seu texto aqui...',
+        outputPlaceholder: 'O texto convertido aparecerá aqui...',
+        charCount: 'Caracteres: {count}',
+        upper: 'MAIÚSCULAS',
+        lower: 'minúsculas',
+        invert: 'Inverter Caso',
+        titleCase: 'Caso de Título',
+        sentence: 'Caso de Sentença',
+        clear: 'Limpar Tudo',
+        copy: 'Copiar',
+        toast: 'Texto copiado para a área de transferência!'
+      },
+      en: {
+        title: 'Text Converter',
+        subtitle: 'Transform your text in seconds • Free and ad-free',
+        inputPlaceholder: 'Paste or type your text here...',
+        outputPlaceholder: 'The converted text will appear here...',
+        charCount: 'Characters: {count}',
+        upper: 'UPPERCASE',
+        lower: 'lowercase',
+        invert: 'Invert Case',
+        titleCase: 'Title Case',
+        sentence: 'Sentence Case',
+        clear: 'Clear All',
+        copy: 'Copy',
+        toast: 'Text copied to clipboard!'
+      },
+      es: {
+        title: 'Convertidor de Texto',
+        subtitle: 'Transforma tu texto en segundos • Gratuito y sin anuncios',
+        inputPlaceholder: 'Pega o escribe tu texto aquí...',
+        outputPlaceholder: 'El texto convertido aparecerá aquí...',
+        charCount: 'Caracteres: {count}',
+        upper: 'MAYÚSCULAS',
+        lower: 'minúsculas',
+        invert: 'Invertir Caso',
+        titleCase: 'Caso de Título',
+        sentence: 'Caso de Oración',
+        clear: 'Limpiar Todo',
+        copy: 'Copiar',
+        toast: 'Texto copiado al portapapeles!'
+      },
+      fr: {
+        title: 'Convertisseur de Texte',
+        subtitle: 'Transformez votre texte en secondes • Gratuit et sans publicité',
+        inputPlaceholder: 'Collez ou tapez votre texte ici...',
+        outputPlaceholder: 'Le texte converti apparaîtra ici...',
+        charCount: 'Caractères: {count}',
+        upper: 'MAJUSCULES',
+        lower: 'minuscules',
+        invert: 'Inverser la Casse',
+        titleCase: 'Casse de Titre',
+        sentence: 'Casse de Phrase',
+        clear: 'Effacer Tout',
+        copy: 'Copier',
+        toast: 'Texte copié dans le presse-papiers!'
+      }
+    };
 
-            if (upperCount > lowerCount) {
-                return input.toLowerCase();
-            } else {
-                return input.toUpperCase();
-            }
-        }
+    const input = document.getElementById('input');
+    const output = document.getElementById('output');
+    const charCount = document.getElementById('char-count');
+    const toast = document.getElementById('toast');
+    const themeToggle = document.querySelector('.theme-toggle');
+    const copyBtn = document.querySelector('.copy-btn');
+    const langSelect = document.getElementById('lang-select');
 
-        function setOutput(text) {
-            if (text) {
-                outputText.textContent = text;
-                outputText.classList.remove('placeholder');
-                copyBtn.style.display = 'block';
-            } else {
-                outputText.textContent = 'O texto convertido aparecerá aqui...';
-                outputText.classList.add('placeholder');
-                copyBtn.style.display = 'none';
-            }
-        }
+    function updateLanguage(lang) {
+      document.documentElement.setAttribute('data-lang', lang);
+      document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
+      const trans = translations[lang];
+      
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        el.textContent = trans[key];
+      });
 
-        function getInput() {
-            return inputText.value;
-        }
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.dataset.i18nPlaceholder;
+        el.placeholder = trans[key];
+        if (el.tagName === 'DIV') el.setAttribute('data-placeholder', trans[key]);
+      });
 
-        function toUpperCase() {
-            setOutput(getInput().toUpperCase());
-        }
+      const count = input.value.length;
+      charCount.textContent = trans.charCount.replace('{count}', count);
 
-        function toLowerCase() {
-            setOutput(getInput().toLowerCase());
-        }
+      toast.textContent = trans.toast;
 
-        function invertCase() {
-            const input = getInput();
-            const output = input.split('').map(char => {
-                if (char === char.toUpperCase()) {
-                    return char.toLowerCase();
-                } else {
-                    return char.toUpperCase();
-                }
-            }).join('');
-            setOutput(output);
-        }
+      output.setAttribute('data-placeholder', trans.outputPlaceholder);
+    }
 
-        function titleCase() {
-            const input = getInput();
-            const output = input.split(' ').map(word => {
-                if (!word) return '';
-                return word[0].toUpperCase() + word.slice(1).toLowerCase();
-            }).join(' ');
-            setOutput(output);
-        }
+    const savedLang = localStorage.getItem('lang') || 'pt';
+    langSelect.value = savedLang;
+    updateLanguage(savedLang);
 
-        function sentenceCase() {
-            const input = getInput();
-            const output = input.toLowerCase().replace(/(^\w|\.\s+\w)/g, match => match.toUpperCase());
-            setOutput(output);
-        }
+    langSelect.addEventListener('change', (e) => {
+      const lang = e.target.value;
+      localStorage.setItem('lang', lang);
+      updateLanguage(lang);
+    });
 
-        function clearInputAndResult() {
-            inputText.value = '';
-            setOutput('');
-            clearInputBtn.style.display = 'none';
-        }
+    if (localStorage.getItem('theme') === 'dark' || 
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeToggle.textContent = '☀️';
+    }
 
-        async function copyResult() {
-            const text = outputText.textContent;
-            if (text && !outputText.classList.contains('placeholder')) {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    showToast();
-                } catch (err) {
-                    console.error('Falha ao copiar: ', err);
-                }
-            }
-        }
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('theme', next);
+    });
 
-        function showToast() {
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-    </script>
+    const conversions = {
+      upper: text => text.toUpperCase(),
+      lower: text => text.toLowerCase(),
+      invert: text => text.split('').map(c => 
+        c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()).join(''),
+      title: text => text.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase()),
+      sentence: text => {
+        const lower = text.toLowerCase();
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+      }
+    };
+
+    function autoConvert() {
+      const text = input.value.trim();
+      if (!text) {
+        output.textContent = '';
+        updateCopyBtn();
+        return;
+      }
+
+      if (text === text.toUpperCase()) {
+        output.textContent = text.toLowerCase();
+      } else if (text === text.toLowerCase()) {
+        output.textContent = text.toUpperCase();
+      } else {
+        output.textContent = conversions.invert(text);
+      }
+      updateCopyBtn();
+    }
+
+    function updateCopyBtn() {
+      if (output.textContent.trim()) {
+        copyBtn.classList.remove('disabled');
+      } else {
+        copyBtn.classList.add('disabled');
+      }
+    }
+
+    input.addEventListener('input', () => {
+      const lang = document.documentElement.getAttribute('data-lang');
+      const trans = translations[lang];
+      charCount.textContent = trans.charCount.replace('{count}', input.value.length);
+      autoConvert();
+    });
+
+    function convert(action) {
+      const text = input.value.trim();
+      if (!text && action !== 'clear') return;
+      
+      if (action === 'clear') {
+        input.value = '';
+        output.textContent = '';
+        const lang = document.documentElement.getAttribute('data-lang');
+        const trans = translations[lang];
+        charCount.textContent = trans.charCount.replace('{count}', 0);
+        updateCopyBtn();
+        return;
+      }
+      
+      if (action === 'copy') {
+        if (!output.textContent.trim()) return;
+        navigator.clipboard.writeText(output.textContent).then(() => {
+          showToast();
+        });
+        return;
+      }
+
+      output.textContent = conversions[action](text);
+      updateCopyBtn();
+    }
+
+    function showToast() {
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    document.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => convert(btn.dataset.action));
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.key === 'Enter' && output.textContent.trim()) {
+        convert('copy');
+      }
+    });
+
+    updateCopyBtn();
+  </script>
 </body>
 </html>
