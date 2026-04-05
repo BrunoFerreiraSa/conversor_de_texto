@@ -196,8 +196,6 @@ button:hover {
 
 button.clear {
   background: #ef4444;
-  grid-column: span 3; /* Spans 3 columns now */
-  padding: 0.4rem;
 }
 
 .toast {
