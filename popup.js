@@ -69,6 +69,13 @@ const themeToggle = document.querySelector('.theme-toggle');
 const copyBtn = document.querySelector('.copy-btn');
 const langSelect = document.getElementById('lang-select');
 
+// Pix Support
+const modalPix = document.getElementById('modal-pix');
+const btnPix = document.getElementById('btn-pix');
+const btnCloseModal = document.querySelector('.close-modal');
+const btnCopyPix = document.getElementById('copy-pix');
+const pixKey = document.getElementById('pix-key');
+
 function updateLanguage(lang) {
   document.documentElement.setAttribute('data-lang', lang);
   document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
@@ -189,6 +196,37 @@ input.addEventListener('input', () => {
 
 document.querySelectorAll('[data-action]').forEach(btn => {
   btn.addEventListener('click', () => convert(btn.dataset.action));
+});
+
+// Pix Modal Logic
+btnPix.addEventListener('click', () => {
+  modalPix.classList.add('show');
+});
+
+btnCloseModal.addEventListener('click', () => {
+  modalPix.classList.remove('show');
+});
+
+window.addEventListener('click', (e) => {
+  if (e.target === modalPix) {
+    modalPix.classList.remove('show');
+  }
+});
+
+btnCopyPix.addEventListener('click', () => {
+  navigator.clipboard.writeText(pixKey.textContent).then(() => {
+    const originalIcon = btnCopyPix.innerHTML;
+    btnCopyPix.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    btnCopyPix.style.background = '#10b981';
+    
+    setTimeout(() => {
+      btnCopyPix.innerHTML = originalIcon;
+      btnCopyPix.style.background = '';
+    }, 2000);
+
+    // Also show global toast
+    showToast();
+  });
 });
 
 // Initialization

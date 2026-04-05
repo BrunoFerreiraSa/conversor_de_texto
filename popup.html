@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="light" data-lang="pt">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="popup.css">
 </head>
+
 <body>
   <div class="container">
     <div class="top-controls">
@@ -28,16 +30,21 @@
 
     <main class="editor-container">
       <section class="editor-card">
-        <textarea id="input" data-i18n-placeholder="inputPlaceholder" placeholder="Cole seu texto aqui..." autofocus></textarea>
-        
+        <textarea id="input" data-i18n-placeholder="inputPlaceholder" placeholder="Cole seu texto aqui..."
+          autofocus></textarea>
+
         <div class="textarea-footer">
           <p class="char-count" id="char-count" data-i18n="charCount">Caracteres: 0</p>
         </div>
-        
+
         <div class="output-container">
           <div class="output" id="output" data-placeholder data-i18n-placeholder="outputPlaceholder"></div>
           <button data-action="copy" class="copy-btn" title="Copiar">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
           </button>
         </div>
 
@@ -51,10 +58,40 @@
         </div>
       </section>
     </main>
+
+    <footer>
+      <p>Feito com ❤️ por <a href="https://www.brutuslabs.com.br" target="_blank"
+          id="link-brutuslabs"><strong>Brutuslabs</strong></a></p>
+      <button id="btn-pix" class="btn-support">Apoie este projeto</button>
+    </footer>
+  </div>
+
+  <div id="modal-pix" class="modal">
+    <div class="modal-content">
+      <button class="close-modal">&times;</button>
+      <h3>Apoie o Projeto 🚀</h3>
+      <p>Gostou da ferramenta? Contribua com qualquer valor para mantermos o projeto gratuito e sem anúncios!</p>
+
+      <div class="qr-container">
+        <img src="icons/pix_qr.png" alt="QR Code Pix" id="pix-qr">
+      </div>
+
+      <div class="pix-key-box">
+        <span id="pix-key">552c64bd-9404-4632-8f32-21e534ccfe37</span>
+        <button id="copy-pix" title="Copiar Chave Pix">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast" data-i18n="toast">Copiado!</div>
 
   <script src="popup.js"></script>
 </body>
+
 </html>

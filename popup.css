@@ -222,6 +222,157 @@ textarea:focus {
   border-color: var(--danger);
 }
 
+/* Footer & Support */
+footer {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+footer p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+#link-brutuslabs {
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+#link-brutuslabs:hover {
+  opacity: 0.8;
+}
+
+#link-brutuslabs strong {
+  color: var(--primary);
+}
+
+.btn-support {
+  background: none;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 0.3rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-support:hover {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+/* Base Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--panel);
+  width: 90%;
+  max-width: 320px;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  position: relative;
+  text-align: center;
+  animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.close-modal {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.modal p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.qr-container {
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  display: inline-block;
+  border: 1px solid var(--border);
+}
+
+.qr-container img {
+  width: 140px;
+  height: 140px;
+  display: block;
+}
+
+.pix-key-box {
+  background: var(--bg);
+  border: 1px dashed var(--primary);
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pix-key-box span {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-main);
+  word-break: break-all;
+  text-align: left;
+}
+
+#copy-pix {
+  background: var(--primary);
+  color: white;
+  border: none;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
 .toast {
   position: fixed;
   bottom: 1.5rem;
