@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light" data-lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conversor de Texto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="top-controls">
+      <select class="lang-select" id="lang-select">
+        <option value="pt">Português</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+      </select>
+      <button class="theme-toggle" aria-label="Alternar tema">🌙</button>
+    </div>
+
+    <header>
+      <h1 data-i18n="title">Conversor de Texto</h1>
+      <p class="subtitle" data-i18n="subtitle">Transforme seu texto em segundos</p>
+    </header>
+
+    <div class="editor">
+      <textarea id="input" data-i18n-placeholder="inputPlaceholder" placeholder="Cole ou digite seu texto aqui..." autofocus></textarea>
+      <p class="char-count" id="char-count" data-i18n="charCount">Caracteres: 0</p>
+      
+      <div class="output-wrapper">
+        <div class="output" id="output" data-placeholder data-i18n-placeholder="outputPlaceholder"></div>
+        <button data-action="copy" class="copy-btn" data-i18n="copy">Copiar</button>
+      </div>
+
+      <div class="toolbar">
+        <button data-action="upper" data-i18n="upper">MAIÚSCULAS</button>
+        <button data-action="lower" data-i18n="lower">minúsculas</button>
+        <button data-action="invert" data-i18n="invert">Inverter</button>
+        <button data-action="title" data-i18n="titleCase">Título</button>
+        <button data-action="sentence" data-i18n="sentence">Sentença</button>
+        <button data-action="clear" class="clear" data-i18n="clear">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" data-i18n="toast">Copiado!</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
